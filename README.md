@@ -1,31 +1,51 @@
 # CEECO Marketing AI
 
-CEECO International marketing command-center starter (MVP) with a Next.js frontend and Django REST API.
+CEECO International marketing command-centre starter built with Next.js, TypeScript, Django REST Framework and a server-side OpenAI integration.
 
-## Project status
+## Status
 
-This repository is being initialized from the CEECO Marketing AI starter. It is an implementation starter, not yet a verified production deployment. Do not enter real customer data or production secrets until authentication, access controls, tests, migrations, and live deployment have been verified.
+The source scaffold is committed to GitHub. This is **not yet a verified live deployment or a production-ready CRM**. The frontend dashboard currently stores lead entries in the browser's local storage; connect the API before treating records as shared team data.
 
-## Architecture
+The UI intentionally avoids invented production metrics. Campaign and task screens are currently placeholders for API-backed CRUD. Authentication endpoints and protected Django API endpoints are included, but role/branch administration, complete UI-to-API integration, token refresh in the browser, automated security review and operational controls remain unfinished.
 
-- `frontend/` — Next.js App Router + TypeScript frontend
-- `backend/` — Django REST Framework API
-- Intended hosting: Vercel frontend, Render backend, managed PostgreSQL
-- AI key is configured server-side only; never commit `.env` files or expose secrets through `NEXT_PUBLIC_*` variables.
+## Structure
+
+- `frontend/` — responsive Next.js dashboard and AI marketing studio
+- `backend/` — Django REST API, JWT authentication, lead/campaign/draft/activity models and server-side AI draft generation
+- `IMPLEMENTATION_PLAN.md` — local setup, environment matrix, known gaps and deploy checklist
+- `backend/render.yaml` — Render service blueprint
+
+## Stack
+
+- Frontend: Next.js App Router, React, TypeScript, custom responsive CSS
+- Backend: Django 5.x, Django REST Framework, SimpleJWT
+- Database: SQLite locally by default; PostgreSQL via DATABASE_URL in hosting
+- AI: OpenAI Responses API, configured only in backend environment
+- Intended deployment: Vercel frontend + Render backend + managed PostgreSQL
 
 ## Local setup
 
-See `IMPLEMENTATION_PLAN.md` and `CODING_PROMPT.md` for the implementation and deployment checklist. Copy each `.env.example` file to a local environment file and fill secrets locally; do not commit these files.
+1. Use Python 3.12+ and Node.js 20+.
+2. In `backend/`: install `requirements.txt`, copy `.env.example` to `.env`, run `python manage.py makemigrations marketing`, `python manage.py migrate`, `python manage.py createsuperuser`, then `python manage.py runserver`.
+3. In `frontend/`: install packages with `npm install`, copy `.env.example` to `.env.local`, then run `npm run dev`.
+4. Run `python manage.py check`, `python manage.py test`, `npm run typecheck` and `npm run build` before any release.
 
-## Deployment checklist
+## Required hosting configuration
 
-1. Configure Vercel with `frontend/` as the root directory.
-2. Configure Render with `backend/` and provision PostgreSQL.
-3. Set backend secrets (`DJANGO_SECRET_KEY`, `DATABASE_URL`, AI provider key, allowed hosts, and CORS origins) in Render's environment dashboard.
-4. Set the frontend API base URL in Vercel.
-5. Run database migrations and create an admin account.
-6. Verify health, login, permissions, CRUD, and AI endpoints against the live deployment before team use.
+Frontend environment:
+- `NEXT_PUBLIC_API_BASE_URL=https://<your-backend-host>/api`
 
-## Limitations
+Backend environment:
+- `DJANGO_SECRET_KEY` — strong generated secret
+- `DJANGO_DEBUG=False`
+- `DATABASE_URL` — managed PostgreSQL connection string
+- `DJANGO_ALLOWED_HOSTS` — backend hostname(s)
+- `CORS_ALLOWED_ORIGINS` — exact Vercel origin(s), comma-separated
+- `OPENAI_API_KEY` — optional until live AI generation is enabled
+- `OPENAI_MODEL=gpt-4.1-mini`
 
-Some dashboard metrics may be demonstration data. External social publishing, messaging, email sending, and third-party lead integrations are not enabled unless explicitly implemented and configured. Add rate limiting, backups, audit logs, monitoring, tests, and data-consent checks before production use.
+Never commit .env files or place provider keys in a `NEXT_PUBLIC_*` variable. The AI endpoint returns a service-unavailable response when the server-side key is missing.
+
+## Before team use
+
+Do not import real enquiries until you have verified live migrations, authentication, permission boundaries, backups and CORS. Complete branch-based access control, user invite/password-reset flow, rate limiting, audit logging, retention/deletion policies, CSV validation, analytics attribution and deployment smoke tests. Review and approve every AI content draft manually. WhatsApp/Meta publishing and outbound messaging are not integrated.
