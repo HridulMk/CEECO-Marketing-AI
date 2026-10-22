@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import {
-  Activity, ArrowUpRight, Bell, CalendarDays, Check, ChevronDown,
+  Activity, ArrowUpRight, Bell, CalendarDays, ChevronDown,
   CircleHelp, ClipboardCheck, Download, FileText, Globe2, LayoutDashboard,
-  Menu, MessageSquare, Megaphone, Plus, Search, Settings, Sparkles, Target,
+  Menu, Megaphone, Plus, Search, Settings, Sparkles, Target,
   Users, WandSparkles, X
 } from "lucide-react";
 
@@ -52,7 +52,7 @@ export default function Home() {
   }
   const filtered = leads.filter((l) => [l.name, l.email, l.location, l.interest, l.source, l.status].join(" ").toLowerCase().includes(search.toLowerCase()));
 
-  function addLead(e: React.FormEvent<HTMLFormElement>) {
+  function addLead(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const next = [{ ...form, id: Date.now(), status: "New lead", score: 50 }, ...leads];
     persistLeads(next);
@@ -78,7 +78,7 @@ export default function Home() {
     }
   }
 
-  async function signIn(e: React.FormEvent<HTMLFormElement>) {
+  async function signIn(e: FormEvent<HTMLFormElement>) {
     e.preventDefault(); setBusy(true);
     try {
       const r = await fetch(`${apiBase}/token/`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ username, password }) });
@@ -91,7 +91,7 @@ export default function Home() {
     } finally { setBusy(false); }
   }
 
-  async function generateDraft(e: React.FormEvent<HTMLFormElement>) {
+  async function generateDraft(e: FormEvent<HTMLFormElement>) {
     e.preventDefault(); setBusy(true); setDraft("");
     try {
       if (!authToken) throw new Error("Sign in first in Settings to use the AI API.");
