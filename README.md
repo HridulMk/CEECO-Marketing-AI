@@ -1,6 +1,6 @@
 # CEECO Marketing AI
 
-CEECO International marketing command-centre starter built with Next.js, TypeScript, Django REST Framework and a server-side OpenAI integration.
+CEECO International marketing command-centre starter built with Next.js, TypeScript, Django REST Framework and a server-side Groq AI integration.
 
 ## Status
 
@@ -11,16 +11,16 @@ The UI intentionally avoids invented production metrics. Campaign and task scree
 ## Structure
 
 - `frontend/` — responsive Next.js dashboard and AI marketing studio
-- `backend/` — Django REST API, JWT authentication, lead/campaign/draft/activity models and server-side AI draft generation
+- `backend/` — Django REST API, JWT authentication, lead/campaign/draft/activity models and server-side Groq AI draft generation
 - `IMPLEMENTATION_PLAN.md` — local setup, environment matrix, known gaps and deploy checklist
 - `backend/render.yaml` — Render service blueprint
 
 ## Stack
 
 - Frontend: Next.js App Router, React, TypeScript, custom responsive CSS
-- Backend: Django 5.x, Django REST Framework, SimpleJWT
+- Backend: Django REST Framework, SimpleJWT
 - Database: SQLite locally by default; PostgreSQL via DATABASE_URL in hosting
-- AI: OpenAI Responses API, configured only in backend environment
+- AI: Groq Chat Completions API, configured only in backend environment
 - Intended deployment: Vercel frontend + Render backend + managed PostgreSQL
 
 ## Local setup
@@ -41,11 +41,11 @@ Backend environment:
 - `DATABASE_URL` — managed PostgreSQL connection string
 - `DJANGO_ALLOWED_HOSTS` — backend hostname(s)
 - `CORS_ALLOWED_ORIGINS` — exact Vercel origin(s), comma-separated
-- `OPENAI_API_KEY` — optional until live AI generation is enabled
-- `OPENAI_MODEL=gpt-4.1-mini`
+- `GROQ_API_KEY` — private Groq API key; required for AI generation
+- `GROQ_MODEL=openai/gpt-oss-120b` — optional; model defaults to this value
 
-Never commit .env files or place provider keys in a `NEXT_PUBLIC_*` variable. The AI endpoint returns a service-unavailable response when the server-side key is missing.
+Never commit `.env` files or place provider keys in a `NEXT_PUBLIC_*` variable. The AI endpoint returns a service-unavailable response when the server-side key is missing.
 
 ## Before team use
 
-Do not import real enquiries until you have verified live migrations, authentication, permission boundaries, backups and CORS. Complete branch-based access control, user invite/password-reset flow, rate limiting, audit logging, retention/deletion policies, CSV validation, analytics attribution and deployment smoke tests. Review and approve every AI content draft manually. WhatsApp/Meta publishing and outbound messaging are not integrated.
+Do not import real customer enquiries until you have verified live migrations, authentication, permission boundaries, backups and CORS. Complete branch-based access control, user invite/password-reset flow, rate limiting, audit logging, retention/deletion policies, CSV validation, analytics attribution and deployment smoke tests. Review and approve every AI content draft manually. WhatsApp/Meta publishing and outbound messaging are not integrated.

@@ -4,7 +4,7 @@ from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from openai import OpenAI
+from groq import Groq
 from .models import Activity, Campaign, ContentDraft, Lead
 from .serializers import ActivitySerializer, CampaignSerializer, ContentDraftSerializer, LeadSerializer
 
@@ -89,33 +89,56 @@ class AIGenerateView(APIView):
         brief = {key: str(request.data.get(key, "")).strip()[:2000] for key in keys}
         if not brief["goal"] or not brief["audience"]:
             return Response({"detail": "goal and audience are required."}, status=status.HTTP_400_BAD_REQUEST)
-        api_key = os.getenv("OPENAI_API_KEY")
+
+        api_key = os.getenv("GROQ_API_KEY")
         if not api_key:
-            return Response({"detail": "AI provider is not configured. Set OPENAI_API_KEY on the backend host."}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
-        try:
-            client = OpenAI(api_key=api_key, timeout=30.0, max_retries=1)
-            response = client.responses.create(
-                model=os.getenv("OPENAI_MODEL", "gpt-4.1-mini"),
-                instructions=(
-                    "You are a careful marketing assistant for CEECO International, an international education consultancy. "
-                    "Create a first draft for human review. Do not invent admission or visa guarantees, rankings, statistics, "
-                    "prices, testimonials, or official partnerships. Do not claim any post has been published. "
-                    "Return a hook, main copy, CTA and a few relevant hashtags where useful."
-                ),
-                input="Write a marketing draft from this brief:\n" + "\n".join(f"{k}: {v}" for k, v in brief.items()),
-                max_output_tokens=900,
+            return Response(
+                {"detail": "AI provider is not configured. Set GROQ_API_KEY on the backend host."},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE,
             )
-            content = response.output_text
+
+        try:
+            client = Groq(api_key=api_key, timeout=30.0, max_retries=1)
+            response = client.chat.completions.create(
+                model=os.getenv("GROQ_MODEL", "openai/gpt-oss-120b"),
+                messages=[
+                    {
+                        "role": "system",
+                        "content": (
+                            "You are a careful marketing assistant for CEECO International, an international education consultancy. "
+                            "Create a first draft for human review. Do not invent admission or visa guarantees, rankings, statistics, "
+                            "prices, testimonials, or official partnerships. Do not claim any post has been published. "
+                            "Return a hook, main copy, CTA and a few relevant hashtags where useful."
+                        ),
+                    },
+                    {
+                        "role": "user",
+                        "content": "Write a marketing draft from this brief:\n"
+                        + "\n".join(f"{key}: {value}" for key, value in brief.items()),
+                    },
+                ],
+                max_completion_tokens=900,
+            )
+            content = response.choices[0].message.content or ""
+            if not content.strip():
+                return Response(
+                    {"detail": "The AI provider returned an empty draft. Please try again."},
+                    status=status.HTTP_502_BAD_GATEWAY,
+                )
+
             saved = ContentDraft.objects.create(
                 channel=brief["channel"] or "General",
                 language=brief["language"] or "English",
-                prompt="; ".join(f"{k}: {v}" for k, v in brief.items()),
+                prompt="; ".join(f"{key}: {value}" for key, value in brief.items()),
                 content=content,
                 created_by=request.user,
             )
             return Response({"content": content, "draft_id": saved.id, "status": "draft"})
         except Exception:
-            return Response({"detail": "AI generation failed. Check the server configuration and provider logs."}, status=status.HTTP_502_BAD_GATEWAY)
+            return Response(
+                {"detail": "AI generation failed. Check the server configuration and provider logs."},
+                status=status.HTTP_502_BAD_GATEWAY,
+            )
 
 
 @api_view(["GET"])
