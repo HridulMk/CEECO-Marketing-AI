@@ -27,6 +27,8 @@ jobs:
   backend:
     name: Django checks and tests
     runs-on: ubuntu-latest
+    env:
+      DJANGO_DEBUG: "True"
     defaults:
       run:
         working-directory: backend
