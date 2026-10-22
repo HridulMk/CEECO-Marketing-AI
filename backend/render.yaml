@@ -14,7 +14,9 @@ services:
       - key: DJANGO_SECRET_KEY
         generateValue: true
       - key: DATABASE_URL
-        sync: false
+        fromDatabase:
+          name: ceeco-marketing-ai-db
+          property: connectionString
       - key: OPENAI_API_KEY
         sync: false
       - key: OPENAI_MODEL
@@ -23,3 +25,10 @@ services:
         sync: false
       - key: DJANGO_ALLOWED_HOSTS
         value: .onrender.com,localhost,127.0.0.1
+
+databases:
+  - name: ceeco-marketing-ai-db
+    databaseName: ceeco_marketing
+    user: ceeco_marketing_user
+    plan: free
+    region: singapore
