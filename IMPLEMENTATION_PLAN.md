@@ -7,7 +7,7 @@ A CEECO International marketing command centre for organizing enquiries, creatin
 - **Frontend:** Next.js App Router + TypeScript; intended for Vercel (frontend/ root).
 - **Backend:** Django REST Framework + SimpleJWT (backend/).
 - **Database:** SQLite for local development by default; set DATABASE_URL for managed PostgreSQL in production.
-- **AI:** OpenAI Responses API called from the backend only. The browser must never receive OPENAI_API_KEY.
+- **AI:** Groq Chat Completions API called from the backend only. The browser must never receive GROQ_API_KEY.
 
 ## Present starter capabilities
 - Responsive workspace UI with section navigation, browser-local lead capture, and CSV export of local records.
@@ -36,15 +36,15 @@ Never enter real customer records until authentication and access permissions ar
 | DATABASE_URL | Backend | PostgreSQL in production | Database connection string |
 | DJANGO_ALLOWED_HOSTS | Backend | Yes for production | Comma-separated hostnames |
 | CORS_ALLOWED_ORIGINS | Backend | Yes | Exact frontend origin(s), comma-separated |
-| OPENAI_API_KEY | Backend | Only for live AI generation | Private provider credential |
-| OPENAI_MODEL | Backend | No | Defaults to gpt-4.1-mini |
+| GROQ_API_KEY | Backend | Only for live AI generation | Private provider credential |
+| GROQ_MODEL | Backend | No | Defaults to openai/gpt-oss-120b |
 | NEXT_PUBLIC_API_BASE_URL | Frontend | Yes for hosted use | Backend base ending in /api |
 
 Do not put secrets in the frontend environment or source files. Values prefixed with NEXT_PUBLIC_ are exposed to browsers.
 
 ## Deployment sequence
 1. **Render database/service:** connect the GitHub repository, deploy the Python service from the repository. The provided blueprint uses backend/ as the root; manual service creation should use commands that start with cd backend &&. Provision PostgreSQL and set DATABASE_URL.
-2. Set DJANGO_SECRET_KEY, DJANGO_DEBUG=False, DJANGO_ALLOWED_HOSTS, CORS_ALLOWED_ORIGINS, OPENAI_MODEL, and optionally OPENAI_API_KEY as backend environment variables. A provider key is not required for the health check.
+2. Set DJANGO_SECRET_KEY, DJANGO_DEBUG=False, DJANGO_ALLOWED_HOSTS, CORS_ALLOWED_ORIGINS and optionally GROQ_MODEL as backend environment variables. Set GROQ_API_KEY on the backend to enable live AI generation; the health check does not require a provider key.
 3. Deploy the Vercel project using frontend/ as root and set NEXT_PUBLIC_API_BASE_URL=https://<render-service-host>/api.
 4. Update backend CORS_ALLOWED_ORIGINS to the exact Vercel origin after the frontend URL is known.
 5. Run migrations and create a Django superuser. Check /api/health/, JWT login, authenticated CRUD permissions, and AI generation when configured.
