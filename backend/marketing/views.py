@@ -1,6 +1,5 @@
 import os
 from django.db.models import Count, Q
-from django.http import JsonResponse
 from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
@@ -13,7 +12,7 @@ from .serializers import ActivitySerializer, CampaignSerializer, ContentDraftSer
 @api_view(["GET"])
 @permission_classes([permissions.AllowAny])
 def health(request):
-    return JsonResponse({"status": "ok", "service": "ceeco-marketing-ai-api"})
+    return Response({"status": "ok", "service": "ceeco-marketing-ai-api"})
 
 
 class LeadViewSet(viewsets.ModelViewSet):
