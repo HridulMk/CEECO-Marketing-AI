@@ -6,5 +6,5 @@ psycopg[binary]>=3.2,<4
 dj-database-url>=2.3,<3
 gunicorn>=23,<24
 whitenoise>=6.8,<7
-openai>=1.60,<3
+groq>=0.13,<2
 python-dotenv>=1.0,<2
